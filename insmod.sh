@@ -14,6 +14,6 @@ echo ""
 
 for item in "${mod_list[@]}"; do
   echo "> insmod-ing ${item} ..."
-  sudo insmod ${PREFIX}/${item} || { echo "* failed on ${item}"; exit 2; }
+  sudo insmod ${PREFIX}/${item} dyndbg=+pl || { echo "* failed on ${item}"; exit 2; }
 done
 echo "* job complete!"
