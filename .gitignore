@@ -2,3 +2,6 @@ cscope.file
 tags
 *.o
 *.ko
+*.cmd
+*.mod*
+*.order
