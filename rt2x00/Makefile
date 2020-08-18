@@ -13,3 +13,5 @@ obj-m		+= rt2x00lib.o
 obj-m		+= rt2x00usb.o
 obj-m		+= rt2800lib.o
 obj-m		+= rt2800usb.o
+
+EXTRA_CFLAGS += -DRATELIMITED_DBG

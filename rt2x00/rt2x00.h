@@ -50,12 +50,52 @@
 #define DEBUG
 #endif /* CONFIG_RT2X00_DEBUG */
 
+#ifdef RATELIMITED_DBG
+#if defined(CONFIG_DYNAMIC_DEBUG)
+#define rt2x00_dbg_ratelimited(wiphy, fmt, ...) \
+  dev_dbg_ratelimited(&(wiphy)->dev, fmt, ##__VA_ARGS__)
+#else
+#define rt2x00_dbg_ratelimited(wiphy, fmt, ...) \
+  do { \
+    static DEFINE_RATELIMIT_STATE(_rs, \
+              DEFAULT_RATELIMIT_INTERVAL, \
+              DEFAULT_RATELIMIT_BURST); \
+    if (__ratelimit(&_rs)) \
+      printk(fmt, ##__VA_ARGS__); \
+  } while (0)
+#endif /* CONFIG_DYNAMIC_DEBUG */
+#endif /* RATELIMITED_DBG */
+
 /* Utility printing macros
  * rt2x00_probe_err is for messages when rt2x00_dev is uninitialized
  */
+#ifdef RATELIMITED_DBG
+#define rt2x00_probe_err(fmt, ...)					\
+	printk(KERN_ERR KBUILD_MODNAME ": %s[L:%d]: Error - " fmt,		\
+	       __func__, __LINE__, ##__VA_ARGS__)
+
+#define rt2x00_err(dev, fmt, ...)					\
+	rt2x00_dbg_ratelimited((dev)->hw->wiphy, "%s[L:%d]: Error - " fmt,	\
+		  __func__, __LINE__, ##__VA_ARGS__)
+#define rt2x00_warn(dev, fmt, ...)					\
+	rt2x00_dbg_ratelimited((dev)->hw->wiphy, "%s[L:%d]: Warning - " fmt,	\
+		   __func__, __LINE__, ##__VA_ARGS__)
+#define rt2x00_info(dev, fmt, ...)					\
+	wiphy_dbg((dev)->hw->wiphy, "%s[L:%d]: Info - " fmt,			\
+		   __func__, __LINE__, ##__VA_ARGS__)
+
+/* Various debug levels */
+#define rt2x00_dbg(dev, fmt, ...)					\
+	wiphy_dbg((dev)->hw->wiphy, "%s[L:%d]: Debug - " fmt,			\
+		  __func__, __LINE__, ##__VA_ARGS__)
+#define rt2x00_eeprom_dbg(dev, fmt, ...)				\
+	wiphy_dbg((dev)->hw->wiphy, "%s[L:%d]: EEPROM recovery - " fmt,	\
+		  __func__, __LINE__, ##__VA_ARGS__)
+#else
 #define rt2x00_probe_err(fmt, ...)					\
 	printk(KERN_ERR KBUILD_MODNAME ": %s: Error - " fmt,		\
 	       __func__, ##__VA_ARGS__)
+
 #define rt2x00_err(dev, fmt, ...)					\
 	wiphy_err_ratelimited((dev)->hw->wiphy, "%s: Error - " fmt,	\
 		  __func__, ##__VA_ARGS__)
@@ -73,6 +113,7 @@
 #define rt2x00_eeprom_dbg(dev, fmt, ...)				\
 	wiphy_dbg((dev)->hw->wiphy, "%s: EEPROM recovery - " fmt,	\
 		  __func__, ##__VA_ARGS__)
+#endif
 
 /*
  * Duration calculations
