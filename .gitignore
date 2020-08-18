@@ -1,0 +1,4 @@
+cscope.file
+tags
+*.o
+*.ko
